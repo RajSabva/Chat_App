@@ -12,7 +12,7 @@
 
 ## Demo
 
-  To test the application:
+    To test the application:
         1. Open the application in multiple browser tabs
         2. Join the same room ID in each tab
         3. Start chatting in real-time!
