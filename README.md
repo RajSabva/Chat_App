@@ -16,7 +16,8 @@
         1. Open the application in multiple browser tabs
         2. Join the same room ID in each tab
         3. Start chatting in real-time!
-        4. **Link to Chat_App:** https://chat-app-wx27.onrender.com
+        
+  **Link to Chat_App**: https://chat-app-wx27.onrender.com
 
 ## Installation & Setup
 
@@ -78,11 +79,11 @@
       user-joined: Notification when a user joins the room
 
 ## Contributing
-  Fork the project
-  Create your feature branch (git checkout -b feature/AmazingFeature)
-  Commit your changes (git commit -m 'Add some AmazingFeature')
-  Push to the branch (git push origin feature/AmazingFeature)
-  Open a Pull Request
+      Fork the project
+      Create your feature branch (git checkout -b feature/AmazingFeature)
+      Commit your changes (git commit -m 'Add some AmazingFeature')
+      Push to the branch (git push origin feature/AmazingFeature)
+      Open a Pull Request
 
 
 ## Acknowledgments
