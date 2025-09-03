@@ -13,10 +13,10 @@
 ## Demo
 
   To test the application:
-    1. Open the application in multiple browser tabs
-    2. Join the same room ID in each tab
-    3. Start chatting in real-time!
-    4. **Link to Chat_App:** https://chat-app-wx27.onrender.com
+        1. Open the application in multiple browser tabs
+        2. Join the same room ID in each tab
+        3. Start chatting in real-time!
+        4. **Link to Chat_App:** https://chat-app-wx27.onrender.com
 
 ## Installation & Setup
 
@@ -37,10 +37,10 @@
        node server.js
 
 ## Project Structure
-  chat-app/
-  ├── server.js          # Express server with Socket.IO configuration
-  ├── index.html         # Frontend HTML with embedded CSS and JavaScript
-  └── package.json       # Project dependencies
+      chat-app/
+      ├── server.js          # Express server with Socket.IO configuration
+      ├── index.html         # Frontend HTML with embedded CSS and JavaScript
+      └── package.json       # Project dependencies
   
 ## Usage
   ### Joining a Room:
