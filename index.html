@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        header {
+            background-color: #4a6fdc;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .room-controls {
+            display: flex;
+            padding: 15px;
+            background-color: #f5f7fb;
+            border-bottom: 1px solid #e1e5eb;
+        }
+        
+        #roomNumber {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #d1d9e6;
+            border-radius: 6px 0 0 6px;
+            font-size: 16px;
+        }
+        
+        #joinRoomBtn {
+            padding: 12px 20px;
+            background-color: #4a6fdc;
+            color: white;
+            border: none;
+            border-radius: 0 6px 6px 0;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        #joinRoomBtn:hover {
+            background-color: #3a5fc8;
+        }
+        
+        .message-display {
+            height: 400px;
+            padding: 15px;
+            overflow-y: auto;
+            background-color: #fafbff;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            border-radius: 18px;
+            word-break: break-word;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .my-message {
+            align-self: flex-end;
+            background-color: #4a6fdc;
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .other-message {
+            align-self: flex-start;
+            background-color: #e6e9f0;
+            color: #333;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .message-sender {
+            font-size: 12px;
+            margin-bottom: 4px;
+            opacity: 0.8;
+        }
+        
+        .input-area {
+            display: flex;
+            padding: 15px;
+            background-color: #f5f7fb;
+            border-top: 1px solid #e1e5eb;
+        }
+        
+        #message {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #d1d9e6;
+            border-radius: 6px 0 0 6px;
+            font-size: 16px;
+        }
+        
+        #sendBtn {
+            padding: 12px 20px;
+            background-color: #4a6fdc;
+            color: white;
+            border: none;
+            border-radius: 0 6px 6px 0;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        #sendBtn:hover {
+            background-color: #3a5fc8;
+        }
+        
+        .status {
+            text-align: center;
+            padding: 10px;
+            color: #666;
+            font-style: italic;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            color: white;
+            text-align: center;
+            max-width: 600px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>CHAT APP</h1>
+            <p>Real-time messaging with room support</p>
+        </header>
+        
+        <div class="room-controls">
+            <input type="text" placeholder="Enter room ID" id="roomNumber">
+            <button id="joinRoomBtn">Join Room</button>
+        </div>
+        
+        <div id="messageDisplay" class="message-display">
+            <div class="status" id="statusMessage">Please join a room to start chatting</div>
+        </div>
+        
+        <div class="input-area">
+            <input type="text" placeholder="Type your message here..." id="message">
+            <button id="sendBtn">Send</button>
+        </div>
+    </div>
+    
+    <div class="instructions">
+        <p>To test the app: open this page in multiple browser tabs, join the same room ID in each, and start chatting!</p>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // DOM elements
+        const messageDisplay = document.getElementById('messageDisplay');
+        const messageInput = document.getElementById('message');
+        const roomNumberInput = document.getElementById('roomNumber');
+        const joinRoomBtn = document.getElementById('joinRoomBtn');
+        const sendBtn = document.getElementById('sendBtn');
+        const statusMessage = document.getElementById('statusMessage');
+        
+        // Socket.io connection
+        const socket = io();
+        let roomId = null;
+        let username = "User" + Math.floor(Math.random() * 1000);
+        
+        // Join room function
+        function joinRoom() {
+            const room = roomNumberInput.value.trim();
+            if (!room) {
+                alert("Please enter a room ID");
+                return;
+            }
+            
+            roomId = room;
+            socket.emit('join-room', room);
+            
+            // Clear previous messages
+            const messages = messageDisplay.querySelectorAll('.message');
+            messages.forEach(msg => msg.remove());
+            
+            statusMessage.textContent = `Joined room: ${room}`;
+            
+            // Add a welcome message
+            addMessage("System", `Welcome to room ${room}! Start chatting.`, "system");
+        }
+        
+        // Send message function
+        function sendMessage() {
+            if (!roomId) {
+                alert("Please join a room first");
+                return;
+            }
+            
+            const msg = messageInput.value.trim();
+            if (!msg) return;
+            
+            socket.emit('message', {room: roomId, msg, username});
+            
+            // Add my message to the display immediately
+            addMessage("You", msg, "my-message");
+            
+            messageInput.value = '';
+            messageInput.focus();
+        }
+        
+        // Add message to display
+        function addMessage(sender, text, messageType) {
+            // Remove status message if it's the first real message
+            if (statusMessage.textContent !== "") {
+                statusMessage.textContent = "";
+            }
+            
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message');
+            messageElement.classList.add(messageType);
+            
+            const senderElement = document.createElement('div');
+            senderElement.classList.add('message-sender');
+            senderElement.textContent = sender;
+            
+            const textElement = document.createElement('div');
+            textElement.textContent = text;
+            
+            messageElement.appendChild(senderElement);
+            messageElement.appendChild(textElement);
+            
+            messageDisplay.appendChild(messageElement);
+            
+            // Scroll to bottom
+            messageDisplay.scrollTop = messageDisplay.scrollHeight;
+        }
+        
+        // Event listeners
+        joinRoomBtn.addEventListener('click', joinRoom);
+        sendBtn.addEventListener('click', sendMessage);
+        
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        roomNumberInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                joinRoom();
+            }
+        });
+        
+        // Socket event handlers
+        socket.on('new-message', (data) => {
+            addMessage(data.username, data.msg, "other-message");
+        });
+        
+        socket.on('user-joined', (data) => {
+            addMessage("System", `${data.username} joined the room`, "system");
+        });
+    </script>
+</body>
+</html>
